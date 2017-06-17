@@ -46,6 +46,24 @@ class BrowserScraper():
             safetyCounter += 1
         return set(users)
 
+    def scrapeMultipleLevels(self, userLink, levels=1, previousList=set(), finalList=[]):
+        if levels == 0:
+            return finalList
+        users = self.scrapeUser(userLink)
+        finalList.extend(users)
+        # Prevent endless loop
+        users.discard(userLink)
+        for oldUser in previousList:
+            users.discard(oldUser)
+        for link in users:
+            # print link
+            finalList.extend(self.scrapeMultipleLevels(link, levels - 1, users))
+        self.closeDriver()
+        return finalList
+
+    def closeDriver(self):
+        self.driver.close()
+
     @classmethod
     def getUserLink(cls, username):
         return "https://www.instagram.com/" + username + "/"
