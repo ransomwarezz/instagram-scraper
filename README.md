@@ -1,12 +1,22 @@
 # How to use
 
-For now just change the username in instagram-scraper.py:
+You can use the InstagramScraper this way:
 
 ```
-username = "<Enter Username here>"
+usage: InstagramScraper [-h] [--username USERNAME] [--level LEVEL]
+                        [--destination DESTINATION]
+
+This is the instagram scraper tool. Enjoy.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --username USERNAME   instagram username of the user to be scraped.
+  --level LEVEL         friends level to scrape
+  --destination DESTINATION
+                        filename where the scraped users are to be stored.
 ```
 
-and invoke via python instagram-scraper.py
+
 
 # Chromedriver binary
 
