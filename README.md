@@ -1,3 +1,11 @@
+# Why use this scraper
+
+Despite being slower than a headless scraper you do not need to actually log in to aquire user informations
+about users who share their photos publically.
+Using this vector this scraper is actually cheap on requests and thus quite stealthy.
+
+Desirable features will be discussed in the issues shortly.
+
 # How to use
 
 You can use the InstagramScraper this way:
