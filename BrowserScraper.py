@@ -1,18 +1,30 @@
 import time
+from selenium.webdriver.support import expected_conditions as EC
+
 from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 class BrowserScraper():
-    def __init__(self, username, level, driver=None):
+    def __init__(self, username, linkLevel, driver=None):
         if driver is None:
             self.driver = webdriver.Chrome('./chromedriver')
-        pass
+
+        self.username = username
+        self.usernameLink = BrowserScraper.getUserLink(username)
+        self._linkLevel = self.linkLevel = linkLevel
+        self.images = {}
+
+    def reset(self):
+        self.linkLevel = self._linkLevel
 
     def wait(self):
-        time.sleep(3)
+        # TODO: Add selenium way of waiting
+        time.sleep(1.5)
 
-    def scrapeUser(self, userLink):
+    def scrapeUser(self, userLink, levels):
         self.driver.get(userLink)
         links = self.driver.find_elements_by_tag_name('a')
         users = []
@@ -27,29 +39,35 @@ class BrowserScraper():
                 continue
 
             if "taken-by" in linkAdress:
+                try:
+                    self.images[levels].append(linkAdress)
+                except Exception:
+                    self.images[levels] = []
+                    self.images[levels].append(linkAdress)
+
                 link.click()
                 self.wait()
-                potentialUsers = self.driver.find_elements_by_tag_name('a')
-                if potentialUsers is not None:
-                    for potentialUser in potentialUsers:
+                potentialUsers = self.driver.find_elements_by_css_selector('li > a')
 
-                        if potentialUser.get_attribute('href') is not None and potentialUser.get_attribute(
-                                'title') in potentialUser.get_attribute('href') and BrowserScraper.isUserLink(
-                            potentialUser):
-                            users.append(potentialUser.get_attribute('href'))
+                if potentialUsers is None:
+                    potentialUsers = []
 
-                    potentialCloseButtons = self.driver.find_elements_by_tag_name('button')
+                for user in [user for user in potentialUsers if BrowserScraper.isUserLink(user)]:
+                    # print  user.get_attribute('href')
+                    users.append(user.get_attribute('href'))
 
-                    for potentialCloseButton in potentialCloseButtons:
-                        if 'CLOSE' in potentialCloseButton.text.upper():
-                            potentialCloseButton.click()
+                potentialCloseButtons = self.driver.find_elements_by_tag_name('button')
+
+                for potentialCloseButton in potentialCloseButtons:
+                    if 'CLOSE' in potentialCloseButton.text.upper():
+                        potentialCloseButton.click()
             safetyCounter += 1
         return set(users)
 
     def scrapeMultipleLevels(self, userLink, levels=1, previousList=set(), finalList=[]):
         if levels == 0:
             return finalList
-        users = self.scrapeUser(userLink)
+        users = self.scrapeUser(userLink, levels)
         finalList.extend(users)
         # Prevent endless loop
         users.discard(userLink)
@@ -60,6 +78,9 @@ class BrowserScraper():
             finalList.extend(self.scrapeMultipleLevels(link, levels - 1, users))
         self.closeDriver()
         return finalList
+
+    def scrape(self, levels=1, previousList=set(), finalList=[]):
+        return list(set(self.scrapeMultipleLevels(self.usernameLink, levels, previousList, finalList)))
 
     def closeDriver(self):
         self.driver.close()
@@ -73,7 +94,9 @@ class BrowserScraper():
         address = link.get_attribute('href')
         parent = link.find_element_by_xpath('..')
 
-        return "/accounts/" not in address and \
+        return address is not None and \
+               link.get_attribute('title') in address and \
+               "/accounts/" not in address and \
                "/p/" not in address and \
                "/legal/" not in address and \
                'LI' in parent.get_property("tagName").upper() and \
