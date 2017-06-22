@@ -4,7 +4,7 @@ from DictUtils import listToDict
 from Scraper import Scraper
 import pprint
 
-prettyPrinter = pprint.PrettyPrinter(indent=4,width=50)
+prettyPrinter = pprint.PrettyPrinter(indent=4, width=50)
 
 
 class HeadlessScraper():
@@ -36,26 +36,24 @@ class HeadlessScraper():
         return link.url.strip() not in userLink.strip()
 
     @classmethod
-    def isUserLink(cls, link):
+    def extractAdressAndTitle(cls, link):
         address = link.url
         titles = [(key, value) for key, value in link.attrs if key.lower() == 'title']
 
         if len(titles) == 0:
-            return False
+            return None, None
 
         _, title = titles.pop()
 
-        return address is not None and \
-               title in address and \
-               "/accounts/" not in address and \
-               "/p/" not in address and \
-               "/legal/" not in address and \
-               '/blog.instagram.com/' not in address and \
-               '/about/' not in address and \
-               '/explore/' not in address and \
-               '/developer/' not in address and \
-               'instagram-press.com' not in address and \
-               'help.instagram.com' not in address
+        return address, title
+
+    @classmethod
+    def isUserLink(cls, link):
+        address, title = cls.extractAdressAndTitle(link)
+
+        return address is not None and\
+               title is not None and\
+               Scraper.isUserLink(address, title)
 
 
 prettyPrinter.pprint(HeadlessScraper('pipapo').scrapeUser())
