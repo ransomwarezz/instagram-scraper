@@ -89,18 +89,19 @@ class BrowserScraper():
 
     @classmethod
     def isUserLink(cls, link):
-        address = link.get_attribute('href')
-        parent = link.find_element_by_xpath('..')
+        address, title = cls.extractAdressAndTitle(link)
+        parent = cls.extractParent(link)
 
-        return address is not None and \
-               link.get_attribute('title') in address and \
-               "/accounts/" not in address and \
-               "/p/" not in address and \
-               "/legal/" not in address and \
-               'LI' in parent.get_property("tagName").upper() and \
-               '/blog.instagram.com/' not in address and \
-               '/about/' not in address and \
-               '/explore/' not in address and \
-               '/developer/' not in address and \
-               'instagram-press.com' not in address and \
-               'help.instagram.com' not in address
+        return Scraper.isUserLink(address, title) and\
+               'LI' in parent.get_property("tagName").upper()
+
+    @classmethod
+    def extractParent(cls, link):
+        parent = link.find_element_by_xpath('..')
+        return parent
+
+    @classmethod
+    def extractAdressAndTitle(cls, link):
+        address = link.get_attribute('href')
+        title = link.get_attribute('title')
+        return address, title
