@@ -6,6 +6,8 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
+from Scraper import Scraper
+
 
 class BrowserScraper():
     def __init__(self, username, linkLevel, driver=None):
@@ -13,7 +15,7 @@ class BrowserScraper():
             self.driver = webdriver.Chrome('./chromedriver')
 
         self.username = username
-        self.usernameLink = BrowserScraper.getUserLink(username)
+        self.usernameLink = Scraper.getUserLink(username)
         self._linkLevel = self.linkLevel = linkLevel
         self.images = {}
 
@@ -84,10 +86,6 @@ class BrowserScraper():
 
     def closeDriver(self):
         self.driver.close()
-
-    @classmethod
-    def getUserLink(cls, username):
-        return "https://www.instagram.com/" + username + "/"
 
     @classmethod
     def isUserLink(cls, link):
