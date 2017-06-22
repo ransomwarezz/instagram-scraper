@@ -1,11 +1,7 @@
-import json
-import time
-from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException
-
 import argparse
+import json
 
-from BrowserScraper import BrowserScraper
+from core.BrowserScraper import BrowserScraper
 
 
 def main():
